@@ -1,0 +1,11 @@
+fastapi
+pydantic
+python-dotenv
+environs
+alembic
+sqlalchemy
+pydantic
+pydantic-settings
+redis
+aioredis
+asyncpg
