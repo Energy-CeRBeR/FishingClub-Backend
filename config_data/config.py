@@ -24,10 +24,12 @@ def load_config(path: str | None = None) -> Config:
     env: Env = Env()
     env.read_env(path)
 
-    return Config(database=DataBase(
-        DB_HOST=env("DB_HOST"),
-        DB_PORT=env("DB_PORT"),
-        DB_USER=env("DB_USER"),
-        DB_PASS=env("DB_PASS"),
-        DB_NAME=env("DB_NAME")
-    ))
+    return Config(
+        database=DataBase(
+            DB_HOST=env("DB_HOST"),
+            DB_PORT=env("DB_PORT"),
+            DB_USER=env("DB_USER"),
+            DB_PASS=env("DB_PASS"),
+            DB_NAME=env("DB_NAME")
+        )
+    )
