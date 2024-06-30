@@ -1,11 +1,12 @@
-fastapi
+fastapi~=0.111.0
 pydantic
 python-dotenv
-environs
-alembic
-sqlalchemy
+environs~=11.0.0
+alembic~=1.13.2
+sqlalchemy~=2.0.31
 pydantic
 pydantic-settings
 redis
 aioredis
 asyncpg
+uvicorn~=0.30.1
