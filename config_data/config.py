@@ -1,5 +1,9 @@
 from dataclasses import dataclass
+from pathlib import Path
+
 from environs import Env
+
+BASE_DIR = Path(__file__).parent.parent
 
 
 @dataclass
@@ -16,8 +20,16 @@ class DataBase:
 
 
 @dataclass
+class AuthJWT:
+    private_key_path: Path = BASE_DIR / "certs" / "jwt-private.pem"
+    public_key_path: Path = BASE_DIR / "certs" / "jwt-public.pem"
+    algorithm: str = "RS256"
+
+
+@dataclass
 class Config:
     database: DataBase
+    authJWT: AuthJWT
 
 
 def load_config(path: str | None = None) -> Config:
@@ -30,6 +42,11 @@ def load_config(path: str | None = None) -> Config:
             DB_PORT=env("DB_PORT"),
             DB_USER=env("DB_USER"),
             DB_PASS=env("DB_PASS"),
-            DB_NAME=env("DB_NAME")
+            DB_NAME=env("DB_NAME"),
+        ),
+        authJWT=AuthJWT(
+            private_key_path=AuthJWT.public_key_path,
+            public_key_path=AuthJWT.public_key_path,
+            algorithm=AuthJWT.algorithm
         )
     )

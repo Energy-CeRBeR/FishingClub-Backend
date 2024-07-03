@@ -26,6 +26,7 @@ class User(Base):
     short_name: Mapped[str] = mapped_column(unique=True)
     email: Mapped[str] = mapped_column(unique=True)
     email_verified: Mapped[bool] = mapped_column(default=False)
+    password_hash: Mapped[bytes] = mapped_column()
     gender: Mapped[Gender] = mapped_column(default=Gender.male)
     role: Mapped[Roles] = mapped_column(default=Roles.user)
     created_at: Mapped[datetime.datetime] = mapped_column(default=func.now())
