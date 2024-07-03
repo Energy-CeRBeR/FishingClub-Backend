@@ -3,17 +3,17 @@ from typing import Optional
 from sqlalchemy import insert, select, delete
 
 from src.utils import auth_settings
-from .models import User
-from .schemas import UserCreate
+from src.users.models import User
+from src.users.schemas import UserCreate
 
 from fastapi import HTTPException
 
-from ..database import async_session
+from src.database import async_session
 
 
 class UserRepository:
 
-    async def create(self, user: UserCreate) -> User:
+    async def create_user(self, user: UserCreate) -> User:
         async with async_session() as session:
             query = select(User).where(User.email == user.email)
             result = await session.execute(query)
@@ -35,7 +35,7 @@ class UserRepository:
 
         return user
 
-    async def get_by_email(self, email: str) -> Optional[User]:
+    async def get_user_by_email(self, email: str) -> Optional[User]:
         async with async_session() as session:
             query = select(User).where(User.email == email)
             result = await session.execute(query)
