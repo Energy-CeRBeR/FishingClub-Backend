@@ -1,5 +1,6 @@
 import datetime
 from enum import Enum
+from typing import Dict, Any
 
 from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -30,3 +31,13 @@ class User(Base):
     gender: Mapped[Gender] = mapped_column(default=Gender.male)
     role: Mapped[Roles] = mapped_column(default=Roles.user)
     created_at: Mapped[datetime.datetime] = mapped_column(default=func.now())
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "name": self.name,
+            "surname": self.surname,
+            "short_name": self.short_name,
+            "email": self.email,
+            "email_verified": self.email_verified,
+            "gender": self.gender,
+        }
