@@ -12,7 +12,7 @@ auth_config = settings.authJWT
 
 
 @router.post("/register")
-async def register(user_create: UserCreate):
+async def register(user_create: UserCreate) -> Token:
     user = await UserService().create_user(user_create)
     access_token = encode_jwt(payload={"sub": user.short_name})
     return Token(access_token=access_token, token_type="bearer")

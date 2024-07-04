@@ -46,7 +46,7 @@ def load_config(path: str | None = None) -> Config:
             DB_NAME=env("DB_NAME"),
         ),
         authJWT=AuthJWT(
-            private_key_path=AuthJWT.public_key_path,
+            private_key_path=AuthJWT.private_key_path,
             public_key_path=AuthJWT.public_key_path,
             algorithm=AuthJWT.algorithm
         )
