@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
 from config_data.config import Config, load_config
 from src.users.models import User
@@ -18,7 +18,7 @@ auth_config = settings.authJWT
 async def register(user_create: UserCreate) -> Token:
     user = await UserService().create_user(user_create)
     access_token = encode_jwt(payload={"sub": user.short_name})
-    return Token(access_token=access_token, token_type="bearer")
+    return Token(access_token=access_token, token_type="Bearer")
 
 
 @router.post("/login", response_model=Token)

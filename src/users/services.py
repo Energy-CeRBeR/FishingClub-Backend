@@ -2,7 +2,7 @@ import jwt
 
 from typing import Annotated
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from config_data.config import Config, load_config
 from src.users.models import User
@@ -10,7 +10,8 @@ from src.users.repositories import UserRepository
 from src.users.schemas import UserCreate, TokenData
 from src.utils.auth_settings import validate_password, decode_jwt
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="user/login")
+# oauth2_scheme = OAuth2PasswordBearer(tokenUrl="user/login")
+http_bearer = HTTPBearer()
 
 settings: Config = load_config(".env")
 auth_config = settings.authJWT
@@ -37,16 +38,16 @@ class UserService:
     async def authenticate_user_by_token(self, token: str) -> User | None:
         pass
 
-    async def get_current_user(self, token: Annotated[str, Depends(oauth2_scheme)]):
+    async def get_current_user(self, token: HTTPAuthorizationCredentials = Depends(http_bearer)) -> User:
         credentials_exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
         try:
-            token = token.strip()
+            token = token.credentials
             print("TOKEN:", token)
-            payload = decode_jwt(token)
+            payload = decode_jwt(token=token)
             short_name: str = payload.get("sub")
             print("NAME:", short_name)
             if short_name is None:
