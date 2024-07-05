@@ -57,8 +57,8 @@ class Image(Base):
     __tablename__ = "images"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    report_id: Mapped[int] = mapped_column(ForeignKey("reports.id"))
     path: Mapped[str] = mapped_column()
+    report_id: Mapped[int] = mapped_column(ForeignKey("reports.id"))
 
 
 class Report(Base):
@@ -67,6 +67,7 @@ class Report(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     title: Mapped[str] = mapped_column()
     description: Mapped[str] = mapped_column(nullable=True)
+
     tackle: Mapped[FishingTackle] = mapped_column()
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     caught_fishes: Mapped[List["CaughtFish"]] = relationship(
