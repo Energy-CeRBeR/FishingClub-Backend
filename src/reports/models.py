@@ -1,12 +1,14 @@
 import datetime
 from enum import Enum
-from typing import Dict, Any, List
+from typing import List
 
-from sqlalchemy import ForeignKey, func, LargeBinary
+from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-# from src.users.models import User
 
 from src.database import Base
+
+
+# from src.users.models import User
 
 
 class FishingTackle(Enum):
@@ -17,7 +19,6 @@ class FishingTackle(Enum):
 
 
 class RiverFish(Enum):
-    """50 самых популярных речных рыб"""
     carp = "Карп"
     crucian_carp = "Карась"
     bream = "Лещ"
@@ -65,6 +66,7 @@ class Report(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     title: Mapped[str] = mapped_column()
+    description: Mapped[str] = mapped_column(nullable=True)
     tackle: Mapped[FishingTackle] = mapped_column()
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     caught_fishes: Mapped[List["CaughtFish"]] = relationship(
