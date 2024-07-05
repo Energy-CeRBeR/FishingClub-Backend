@@ -9,7 +9,13 @@ from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from src.database import Base
+
 from src.users.models import User  # noqa
+from src.reports.models import (  # noqa
+    CaughtFish,
+    Image,
+    Report,
+)
 
 from alembic import context
 
