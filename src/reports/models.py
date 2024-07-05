@@ -46,7 +46,8 @@ class CaughtFish(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     report_id: Mapped[int] = mapped_column(ForeignKey("reports.id"))
     fish_type: Mapped[RiverFish] = mapped_column()
-    weight: Mapped[float] = mapped_column()
+    total_weight: Mapped[float] = mapped_column()
+    total_count: Mapped[int] = mapped_column()
 
     report: Mapped["Report"] = relationship("Report", back_populates="images")
 
