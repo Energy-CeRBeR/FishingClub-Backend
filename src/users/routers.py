@@ -35,9 +35,6 @@ async def authenticate_user_jwt(user: UserLogin = Depends(UserService().authenti
     )
 
 
-router.post("/self")
-
-
 @router.post("/self")
 async def login_for_access_token(
         current_user: Annotated[User, Depends(UserService().get_current_user)]
