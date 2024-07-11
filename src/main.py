@@ -1,4 +1,4 @@
-import uvicoпrn
+import uvicorn
 from fastapi import FastAPI
 
 from src.users.routers import router as users_router
