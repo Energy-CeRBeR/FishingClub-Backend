@@ -1,12 +1,14 @@
 import datetime
 from enum import Enum
-from typing import Dict, Any, List
+from typing import List
 
-from sqlalchemy import ForeignKey, func, LargeBinary
+from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-# from src.users.models import User
 
 from src.database import Base
+
+
+# from src.users.models import User
 
 
 class FishingTackle(Enum):
@@ -17,7 +19,6 @@ class FishingTackle(Enum):
 
 
 class RiverFish(Enum):
-    """50 самых популярных речных рыб"""
     carp = "Карп"
     crucian_carp = "Карась"
     bream = "Лещ"
@@ -49,15 +50,17 @@ class CaughtFish(Base):
     total_weight: Mapped[float] = mapped_column()
     total_count: Mapped[int] = mapped_column()
 
-    report: Mapped["Report"] = relationship("Report", back_populates="images")
+    reports: Mapped["Report"] = relationship("Report", back_populates="caught_fishes")
 
 
 class Image(Base):
     __tablename__ = "images"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    report_id: Mapped[int] = mapped_column(ForeignKey("reports.id"))
     path: Mapped[str] = mapped_column()
+    report_id: Mapped[int] = mapped_column(ForeignKey("reports.id"))
+
+    reports: Mapped["Report"] = relationship("Report", back_populates="images")
 
 
 class Report(Base):
@@ -65,14 +68,15 @@ class Report(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     title: Mapped[str] = mapped_column()
+    description: Mapped[str] = mapped_column(nullable=True)
     tackle: Mapped[FishingTackle] = mapped_column()
+    created_at: Mapped[datetime.datetime] = mapped_column(default=func.now())
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+
     caught_fishes: Mapped[List["CaughtFish"]] = relationship(
-        "CaughtFish", back_populates="report", cascade="all, delete-orphan"
+        "CaughtFish", back_populates="reports", cascade="all, delete-orphan"
     )
     images: Mapped[List["Image"]] = relationship(
-        "Image", back_populates="report", cascade="all, delete-orphan"
+        "Image", back_populates="reports", cascade="all, delete-orphan"
     )
-    created_at: Mapped[datetime.datetime] = mapped_column(default=func.now())
-
     user: Mapped["User"] = relationship("User", back_populates="reports")
