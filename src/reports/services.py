@@ -1,6 +1,6 @@
 from typing import List
 
-from src.reports.models import Report
+from src.reports.models import Report, CaughtFish
 from src.reports.repositories import ReportRepository
 from src.reports.schemas import ReportCreate, FishCreate
 
@@ -22,3 +22,15 @@ class ReportService:
 
     async def add_fish_to_report(self, report: Report, fish: FishCreate):
         return await self.repository.add_fish(fish, report)
+
+    @staticmethod
+    def caught_fish_to_dict(caught_fish: list[CaughtFish]) -> list[dict]:
+        fishes = []
+        for fish in caught_fish:
+            fishes.append({
+                "fish_type": fish.fish_type.value,
+                "total_weight": fish.total_weight,
+                "total_count": fish.total_count
+            })
+
+        return fishes

@@ -1,9 +1,8 @@
-from typing import Annotated, List
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from src.reports.models import Report
-from src.reports.schemas import ReportCreate, ReportResponse, FishCreate
+from src.reports.schemas import ReportCreate, FishCreate
 from src.reports.services import ReportService
 from src.users.models import User
 from src.users.services import UserService
@@ -20,8 +19,8 @@ async def create_report(
     return {"success": "ok"}
 
 
-@router.get("/all", response_model=List[ReportResponse])
-async def get_all_reports() -> List[Report]:
+@router.get("/all")
+async def get_all_reports():
     reports = await ReportService().get_all_reports()
     return reports
 
@@ -31,6 +30,7 @@ async def get_report_by_id(report_id: int):
     report = await ReportService().get_report_by_id(report_id)
     if report is None:
         raise HTTPException(status_code=404, detail="Report not found")
+
     return report
 
 
@@ -46,15 +46,14 @@ async def add_fish_to_report(
         raise HTTPException(status_code=403, detail="Access error")
 
     await ReportService().add_fish_to_report(report, fish)
+
     return {"success": "ok"}
 
 
-@router.post("/{report_id}/fishes")
+@router.get("/{report_id}/fishes")
 async def get_fishes_in_report(report_id: int):
     report = await ReportService().get_report_by_id(report_id)
-    print("OKKKKKK")
     if report is None:
         raise HTTPException(status_code=404, detail="Report not found")
-    fishes = report.caught_fishes
-    print(type(fishes))
-    return {"success": "ok"}
+
+    return {"report_id": report.id, "caught_fish": ReportService().caught_fish_to_dict(report.caught_fish)}

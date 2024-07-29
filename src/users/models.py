@@ -1,6 +1,6 @@
 import datetime
 from enum import Enum
-from typing import Dict, Any, List
+from typing import Dict, Any
 
 from sqlalchemy import func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -34,9 +34,7 @@ class User(Base):
     role: Mapped[Roles] = mapped_column(default=Roles.user)
     created_at: Mapped[datetime.datetime] = mapped_column(default=func.now())
 
-    reports: Mapped[List["Report"]] = relationship(
-        "Report", back_populates="user", cascade="all, delete-orphan"
-    )
+    reports: Mapped[list["Report"]] = relationship(back_populates="user", uselist=True, lazy="selectin")
 
     def to_dict(self) -> Dict[str, Any]:
         return {

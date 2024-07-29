@@ -1,6 +1,6 @@
 import datetime
 from enum import Enum
-from typing import List
+from typing import Dict, Any
 
 from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -50,7 +50,15 @@ class CaughtFish(Base):
     total_weight: Mapped[float] = mapped_column()
     total_count: Mapped[int] = mapped_column()
 
-    reports: Mapped["Report"] = relationship("Report", back_populates="caught_fishes")
+    report: Mapped["Report"] = relationship(back_populates="caught_fish", uselist=False)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "report_id": self.report_id,
+            "fish_type": self.fish_type,
+            "total_weight": self.total_weight,
+            "total_count": self.total_count
+        }
 
 
 class Image(Base):
@@ -60,7 +68,7 @@ class Image(Base):
     path: Mapped[str] = mapped_column()
     report_id: Mapped[int] = mapped_column(ForeignKey("reports.id"))
 
-    reports: Mapped["Report"] = relationship("Report", back_populates="images")
+    report: Mapped["Report"] = relationship(back_populates="images", uselist=False)
 
 
 class Report(Base):
@@ -73,10 +81,6 @@ class Report(Base):
     created_at: Mapped[datetime.datetime] = mapped_column(default=func.now())
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
-    caught_fishes: Mapped[List["CaughtFish"]] = relationship(
-        "CaughtFish", back_populates="reports", cascade="all, delete-orphan"
-    )
-    images: Mapped[List["Image"]] = relationship(
-        "Image", back_populates="reports", cascade="all, delete-orphan"
-    )
-    user: Mapped["User"] = relationship("User", back_populates="reports")
+    caught_fish: Mapped[list["CaughtFish"]] = relationship(back_populates="report", uselist=True, lazy="selectin")
+    images: Mapped[list["Image"]] = relationship(back_populates="report", uselist=True, lazy="selectin")
+    user: Mapped["User"] = relationship(back_populates="reports", uselist=False)
