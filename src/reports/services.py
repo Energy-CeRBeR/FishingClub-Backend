@@ -1,6 +1,6 @@
 from typing import List
 
-from src.reports.models import Report, CaughtFish
+from src.reports.models import Report, CaughtFish, Comment
 from src.reports.repositories import ReportRepository
 from src.reports.schemas import ReportCreate, FishCreate
 from src.users.models import User
@@ -21,6 +21,9 @@ class ReportService:
     async def get_report_by_id(self, report_id: int) -> Report:
         return await self.repository.get_report_by_id(report_id)
 
+    async def get_comment_by_id(self, comment_id: int) -> Comment:
+        return await self.repository.get_comment_by_id(comment_id)
+
     async def delete_report(self, report: Report) -> None:
         return await self.repository.delete_report(report)
 
@@ -30,6 +33,12 @@ class ReportService:
     async def stared_report(self, report: Report, user: User):
         flag = self.is_stared(report, user)
         return await self.repository.stared_report(report, user, flag)
+
+    async def comment_report(self, report: Report, user: User, text: str):
+        return await self.repository.comment_report(report, user, text)
+
+    async def delete_comment(self, comment: Comment):
+        return await self.repository.delete_comment(comment)
 
     @staticmethod
     def is_stared(report: Report, user: User):

@@ -46,10 +46,39 @@ async def stared_report(current_user: Annotated[User, Depends(UserService().get_
     report = await ReportService().get_report_by_id(report_id)
     if report is None:
         raise HTTPException(status_code=404, detail="Report not found")
-    # if report.user_id == current_user.id:
-    #     raise HTTPException(status_code=403, detail="You can't star your own report")
+    if report.user_id == current_user.id:
+        raise HTTPException(status_code=403, detail="You can't star your own report")
 
     await ReportService().stared_report(report, current_user)
+
+    return {"success": "ok"}
+
+
+@router.post("/{report_id}/comment")
+async def comment_report(
+        current_user: Annotated[User, Depends(UserService().get_current_user)],
+        report_id: int,
+        comment: str):
+    report = await ReportService().get_report_by_id(report_id)
+    if report is None:
+        raise HTTPException(status_code=404, detail="Report not found")
+
+    await ReportService().comment_report(report, current_user, comment)
+
+    return {"success": "ok"}
+
+
+@router.delete("/{report_id}/comment")
+async def delete_comment(
+        current_user: Annotated[User, Depends(UserService().get_current_user)],
+        comment_id: int):
+    comment = await ReportService().get_comment_by_id(comment_id)
+    if comment is None:
+        raise HTTPException(status_code=404, detail="Comment not found")
+    if comment.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Access error")
+
+    await ReportService().delete_comment(comment)
 
     return {"success": "ok"}
 

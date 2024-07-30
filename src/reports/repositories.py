@@ -3,7 +3,7 @@ from typing import Optional, List
 from sqlalchemy import select, insert, delete, and_
 
 from src.database import async_session
-from src.reports.models import Report, Image, CaughtFish, Star
+from src.reports.models import Report, Image, CaughtFish, Star, Comment
 from src.reports.schemas import ReportCreate, FishCreate
 from src.users.models import User
 
@@ -38,6 +38,13 @@ class ReportRepository:
             report = result.scalars().first()
         return report
 
+    async def get_comment_by_id(self, comment_id: int) -> Optional[Comment]:
+        async with async_session() as session:
+            stmt = select(Comment).where(Comment.id == comment_id)
+            result = await session.execute(stmt)
+            comment = result.scalars().first()
+        return comment
+
     async def delete_report(self, report: Report) -> None:
         async with async_session() as session:
             stmt = delete(Report).where(Report.id == report.id)
@@ -50,6 +57,18 @@ class ReportRepository:
                 stmt = insert(Star).values(user_id=user.id, report_id=report.id)
             else:
                 stmt = delete(Star).where(and_(Star.user_id == user.id, Star.report_id == report.id))
+            await session.execute(stmt)
+            await session.commit()
+
+    async def comment_report(self, report: Report, user: User, text: str) -> None:
+        async with async_session() as session:
+            stmt = insert(Comment).values(user_id=user.id, report_id=report.id, text=text)
+            await session.execute(stmt)
+            await session.commit()
+
+    async def delete_comment(self, comment: Comment) -> None:
+        async with async_session() as session:
+            stmt = delete(Comment).where(Comment.id == comment.id)
             await session.execute(stmt)
             await session.commit()
 
