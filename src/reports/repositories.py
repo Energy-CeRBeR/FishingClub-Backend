@@ -23,6 +23,13 @@ class ReportRepository:
             reports = result.scalars().all()
         return reports
 
+    async def get_all_user_reports(self, user_id: int) -> List[Report]:
+        async with async_session() as session:
+            stmt = select(Report).where(Report.user_id == user_id)
+            result = await session.execute(stmt)
+            reports = result.scalars().all()
+        return reports
+
     async def get_report_by_id(self, report_id: int) -> Optional[Report]:
         async with async_session() as session:
             stmt = select(Report).where(Report.id == report_id)

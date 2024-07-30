@@ -6,6 +6,7 @@ from src.reports.schemas import ReportCreate, FishCreate
 from src.reports.services import ReportService
 from src.users.models import User
 from src.users.services import UserService
+from src.users.routers import router as user_router
 
 router = APIRouter(tags=["fishing"], prefix="/reports")
 
@@ -22,6 +23,12 @@ async def create_report(
 @router.get("/all")
 async def get_all_reports():
     reports = await ReportService().get_all_reports()
+    return reports
+
+
+@user_router.get("/my_reports")
+async def get_all_user_reports(current_user: Annotated[User, Depends(UserService().get_current_user)]):
+    reports = await ReportService().get_all_user_reports(current_user.id)
     return reports
 
 

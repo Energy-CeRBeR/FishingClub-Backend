@@ -14,6 +14,9 @@ class ReportService:
     async def get_all_reports(self) -> List[Report]:
         return await self.repository.get_all_reports()
 
+    async def get_all_user_reports(self, user_id: int) -> List[Report]:
+        return await self.repository.get_all_user_reports(user_id)
+
     async def get_report_by_id(self, report_id: int) -> Report:
         return await self.repository.get_report_by_id(report_id)
 
