@@ -71,6 +71,30 @@ class Image(Base):
     report: Mapped["Report"] = relationship(back_populates="images", uselist=False)
 
 
+class Comment(Base):
+    __tablename__ = "comments"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    text: Mapped[str] = mapped_column(nullable=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(default=func.now())
+    report_id: Mapped[int] = mapped_column(ForeignKey("reports.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+
+    report: Mapped["Report"] = relationship(back_populates="comments", uselist=False)
+    user: Mapped["User"] = relationship(back_populates="comments", uselist=False)
+
+
+class Star(Base):
+    __tablename__ = "stars"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    report_id: Mapped[int] = mapped_column(ForeignKey("reports.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+
+    report: Mapped["Report"] = relationship(back_populates="stars", uselist=False)
+    user: Mapped["User"] = relationship(back_populates="stars", uselist=False)
+
+
 class Report(Base):
     __tablename__ = "reports"
 
@@ -83,4 +107,6 @@ class Report(Base):
 
     caught_fish: Mapped[list["CaughtFish"]] = relationship(back_populates="report", uselist=True, lazy="selectin")
     images: Mapped[list["Image"]] = relationship(back_populates="report", uselist=True, lazy="selectin")
+    comments: Mapped[list["Comment"]] = relationship(back_populates="report", uselist=True, lazy="selectin")
+    stars: Mapped[list["Star"]] = relationship(back_populates="report", uselist=True, lazy="selectin")
     user: Mapped["User"] = relationship(back_populates="reports", uselist=False)

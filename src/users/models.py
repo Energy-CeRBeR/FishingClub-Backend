@@ -35,6 +35,8 @@ class User(Base):
     created_at: Mapped[datetime.datetime] = mapped_column(default=func.now())
 
     reports: Mapped[list["Report"]] = relationship(back_populates="user", uselist=True, lazy="selectin")
+    comments: Mapped[list["Comment"]] = relationship(back_populates="user", uselist=True, lazy="selectin")
+    stars: Mapped[list["Star"]] = relationship(back_populates="user", uselist=True, lazy="selectin")
 
     def to_dict(self) -> Dict[str, Any]:
         return {

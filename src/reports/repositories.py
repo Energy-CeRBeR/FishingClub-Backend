@@ -1,10 +1,11 @@
 from typing import Optional, List
 
-from sqlalchemy import select, insert, delete
+from sqlalchemy import select, insert, delete, and_
 
 from src.database import async_session
-from src.reports.models import Report, Image, CaughtFish
+from src.reports.models import Report, Image, CaughtFish, Star, Comment
 from src.reports.schemas import ReportCreate, FishCreate
+from src.users.models import User
 
 
 class ReportRepository:
@@ -23,6 +24,13 @@ class ReportRepository:
             reports = result.scalars().all()
         return reports
 
+    async def get_all_user_reports(self, user_id: int) -> List[Report]:
+        async with async_session() as session:
+            stmt = select(Report).where(Report.user_id == user_id)
+            result = await session.execute(stmt)
+            reports = result.scalars().all()
+        return reports
+
     async def get_report_by_id(self, report_id: int) -> Optional[Report]:
         async with async_session() as session:
             stmt = select(Report).where(Report.id == report_id)
@@ -30,9 +38,37 @@ class ReportRepository:
             report = result.scalars().first()
         return report
 
+    async def get_comment_by_id(self, comment_id: int) -> Optional[Comment]:
+        async with async_session() as session:
+            stmt = select(Comment).where(Comment.id == comment_id)
+            result = await session.execute(stmt)
+            comment = result.scalars().first()
+        return comment
+
     async def delete_report(self, report: Report) -> None:
         async with async_session() as session:
             stmt = delete(Report).where(Report.id == report.id)
+            await session.execute(stmt)
+            await session.commit()
+
+    async def stared_report(self, report: Report, user: User, flag: bool) -> None:
+        async with async_session() as session:
+            if not flag:
+                stmt = insert(Star).values(user_id=user.id, report_id=report.id)
+            else:
+                stmt = delete(Star).where(and_(Star.user_id == user.id, Star.report_id == report.id))
+            await session.execute(stmt)
+            await session.commit()
+
+    async def comment_report(self, report: Report, user: User, text: str) -> None:
+        async with async_session() as session:
+            stmt = insert(Comment).values(user_id=user.id, report_id=report.id, text=text)
+            await session.execute(stmt)
+            await session.commit()
+
+    async def delete_comment(self, comment: Comment) -> None:
+        async with async_session() as session:
+            stmt = delete(Comment).where(Comment.id == comment.id)
             await session.execute(stmt)
             await session.commit()
 
