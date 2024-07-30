@@ -15,6 +15,7 @@ from src.reports.models import (  # noqa
     CaughtFish,
     Image,
     Report,
+    Comment
 )
 
 from alembic import context
