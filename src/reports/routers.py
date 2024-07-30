@@ -41,6 +41,32 @@ async def get_report_by_id(report_id: int):
     return report
 
 
+@router.post("/{report_id}/stared")
+async def stared_report(current_user: Annotated[User, Depends(UserService().get_current_user)], report_id: int):
+    report = await ReportService().get_report_by_id(report_id)
+    if report is None:
+        raise HTTPException(status_code=404, detail="Report not found")
+    # if report.user_id == current_user.id:
+    #     raise HTTPException(status_code=403, detail="You can't star your own report")
+
+    await ReportService().stared_report(report, current_user)
+
+    return {"success": "ok"}
+
+
+@router.delete("/{report_id}")
+async def delete_report(current_user: Annotated[User, Depends(UserService().get_current_user)], report_id: int):
+    report = await ReportService().get_report_by_id(report_id)
+    if report is None:
+        raise HTTPException(status_code=404, detail="Report not found")
+    if report.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Access error")
+
+    await ReportService().delete_report(report)
+
+    return {"success": "ok"}
+
+
 @router.post("/{report_id}/add_fish/")
 async def add_fish_to_report(
         current_user: Annotated[User, Depends(UserService().get_current_user)],

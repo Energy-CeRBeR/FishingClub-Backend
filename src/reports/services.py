@@ -3,6 +3,7 @@ from typing import List
 from src.reports.models import Report, CaughtFish
 from src.reports.repositories import ReportRepository
 from src.reports.schemas import ReportCreate, FishCreate
+from src.users.models import User
 
 
 class ReportService:
@@ -25,6 +26,17 @@ class ReportService:
 
     async def add_fish_to_report(self, report: Report, fish: FishCreate):
         return await self.repository.add_fish(fish, report)
+
+    async def stared_report(self, report: Report, user: User):
+        flag = self.is_stared(report, user)
+        return await self.repository.stared_report(report, user, flag)
+
+    @staticmethod
+    def is_stared(report: Report, user: User):
+        for star in user.stars:
+            if star.report_id == report.id:
+                return True
+        return False
 
     @staticmethod
     def caught_fish_to_dict(caught_fish: list[CaughtFish]) -> list[dict]:

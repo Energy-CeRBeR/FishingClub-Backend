@@ -1,10 +1,11 @@
 from typing import Optional, List
 
-from sqlalchemy import select, insert, delete
+from sqlalchemy import select, insert, delete, and_
 
 from src.database import async_session
-from src.reports.models import Report, Image, CaughtFish
+from src.reports.models import Report, Image, CaughtFish, Star
 from src.reports.schemas import ReportCreate, FishCreate
+from src.users.models import User
 
 
 class ReportRepository:
@@ -40,6 +41,15 @@ class ReportRepository:
     async def delete_report(self, report: Report) -> None:
         async with async_session() as session:
             stmt = delete(Report).where(Report.id == report.id)
+            await session.execute(stmt)
+            await session.commit()
+
+    async def stared_report(self, report: Report, user: User, flag: bool) -> None:
+        async with async_session() as session:
+            if not flag:
+                stmt = insert(Star).values(user_id=user.id, report_id=report.id)
+            else:
+                stmt = delete(Star).where(and_(Star.user_id == user.id, Star.report_id == report.id))
             await session.execute(stmt)
             await session.commit()
 
