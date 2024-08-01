@@ -1,6 +1,6 @@
 from typing import Optional, List
 
-from sqlalchemy import select, insert, delete, and_
+from sqlalchemy import select, insert, delete, and_, update
 
 from src.database import async_session
 from src.reports.models import Report, Image, CaughtFish, Star, Comment
@@ -14,6 +14,13 @@ class ReportRepository:
         report_dc["user_id"] = user_id
         async with async_session() as session:
             stmt = insert(Report).values(**report_dc)
+            await session.execute(stmt)
+            await session.commit()
+
+    async def edit_report(self, report: Report, report_create: ReportCreate) -> None:
+        report_dc = report_create.dict()
+        async with async_session() as session:
+            stmt = update(Report).where(Report.id == report.id).values(**report_dc)
             await session.execute(stmt)
             await session.commit()
 

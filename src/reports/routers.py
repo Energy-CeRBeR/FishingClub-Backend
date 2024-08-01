@@ -19,6 +19,36 @@ async def create_report(
     return {"success": "ok"}
 
 
+@router.put("/{report_id}/edit")
+async def edit_report(
+        report_id: int,
+        report_create: ReportCreate,
+        current_user: Annotated[User, Depends(UserService().get_current_user)]
+):
+    report = await ReportService().get_report_by_id(report_id)
+    if report is None:
+        raise HTTPException(status_code=404, detail="Report not found")
+    if report.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="You are not the owner of this report")
+
+    await ReportService().edit_report(report, report_create)
+
+    return {"success": "ok"}
+
+
+@router.delete("/{report_id}/delete")
+async def delete_report(report_id: int, current_user: Annotated[User, Depends(UserService().get_current_user)]):
+    report = await ReportService().get_report_by_id(report_id)
+    if report is None:
+        raise HTTPException(status_code=404, detail="Report not found")
+    if report.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="You are not the owner of this report")
+
+    await ReportService().delete_report(report)
+
+    return {"success": "ok"}
+
+
 @router.get("/all")
 async def get_all_reports():
     reports = await ReportService().get_all_reports()
@@ -61,7 +91,7 @@ async def comment_report(
     return {"success": "ok"}
 
 
-@router.delete("/{report_id}/comment")
+@router.delete("/comment")
 async def delete_comment(
         current_user: Annotated[User, Depends(UserService().get_current_user)],
         comment_id: int):
@@ -103,12 +133,3 @@ async def add_fish_to_report(
     await ReportService().add_fish_to_report(report, fish)
 
     return {"success": "ok"}
-
-
-@router.get("/{report_id}/fishes")
-async def get_fishes_in_report(report_id: int):
-    report = await ReportService().get_report_by_id(report_id)
-    if report is None:
-        raise HTTPException(status_code=404, detail="Report not found")
-
-    return {"report_id": report.id, "caught_fish": ReportService().caught_fish_to_dict(report.caught_fish)}
