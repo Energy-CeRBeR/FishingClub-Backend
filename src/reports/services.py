@@ -49,12 +49,19 @@ class ReportService:
 
     @staticmethod
     def caught_fish_to_dict(caught_fish: list[CaughtFish]) -> list[dict]:
-        fishes = []
+        response = []
         for fish in caught_fish:
-            fishes.append({
+            response.append({
                 "fish_type": fish.fish_type.value,
                 "total_weight": fish.total_weight,
                 "total_count": fish.total_count
             })
 
-        return fishes
+        return response
+
+    @staticmethod
+    def reports_to_dict(reports: list[Report]) -> list[Report]:
+        response = []
+        for report in reports:
+            response.append(report)
+        return response

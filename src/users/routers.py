@@ -1,8 +1,9 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from config_data.config import Config, load_config
+from src.reports.services import ReportService
 from src.users.models import User
 from src.users.schemas import UserCreate, Token, UserLogin, UserResponse
 from src.users.services import UserService
@@ -38,8 +39,22 @@ async def authenticate_user_jwt(user: UserLogin = Depends(UserService().authenti
 @router.get("/self")
 async def login_for_access_token(
         current_user: Annotated[User, Depends(UserService().get_current_user)]
-) -> UserResponse:
-    return UserResponse(**current_user.to_dict())
+):
+    return {
+        "data": UserResponse(**current_user.to_dict()),
+        "reports": ReportService().reports_to_dict(current_user.reports)
+    }
+
+
+@router.get("/{user_id}")
+async def get_user_by_id(user_id: int):
+    user = await UserService().get_user_by_id(user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {
+        "data": UserResponse(**user.to_dict()),
+        "reports": ReportService().reports_to_dict(user.reports)
+    }
 
 
 @router.delete("")
