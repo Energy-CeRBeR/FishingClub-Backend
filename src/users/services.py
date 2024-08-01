@@ -46,22 +46,17 @@ class UserService:
         )
         try:
             token = token.credentials
-            print("TOKEN:", token)
             payload = decode_jwt(token=token)
             short_name: str = payload.get("sub")
-            print("NAME:", short_name)
             if short_name is None:
                 raise credentials_exception
             token_data = TokenData(short_name=short_name)
         except jwt.DecodeError:
-            print("E1")
             raise credentials_exception
         except jwt.ExpiredSignatureError:
-            print("E2")
             raise credentials_exception
         user = await self.repository.get_user_by_short_name(token_data.short_name)
         if user is None:
-            print("E3")
             raise credentials_exception
 
         return user
