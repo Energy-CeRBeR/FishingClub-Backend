@@ -66,6 +66,9 @@ class UserService:
 
         return user
 
+    async def get_user_by_id(self, user_id: int):
+        return await self.repository.get_user_by_id(user_id)
+
     async def create_user(self, user: UserCreate) -> User:
         return await self.repository.create_user(user)
 

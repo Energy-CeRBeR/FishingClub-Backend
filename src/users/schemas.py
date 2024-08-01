@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+from src.reports.models import Report
 from src.users.models import Gender
 
 
