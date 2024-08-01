@@ -12,6 +12,9 @@ class ReportService:
     async def create_report(self, report: ReportCreate, user_id: int) -> None:
         return await self.repository.create_report(report, user_id)
 
+    async def edit_report(self, report: Report, report_create: ReportCreate) -> None:
+        await self.repository.edit_report(report, report_create)
+
     async def get_all_reports(self) -> List[Report]:
         return await self.repository.get_all_reports()
 

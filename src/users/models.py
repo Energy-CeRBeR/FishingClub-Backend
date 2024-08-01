@@ -5,8 +5,6 @@ from typing import Dict, Any
 from sqlalchemy import func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-# from src.reports.models import Report
-
 from src.database import Base
 
 
@@ -34,9 +32,12 @@ class User(Base):
     role: Mapped[Roles] = mapped_column(default=Roles.user)
     created_at: Mapped[datetime.datetime] = mapped_column(default=func.now())
 
-    reports: Mapped[list["Report"]] = relationship(back_populates="user", uselist=True, lazy="selectin")
-    comments: Mapped[list["Comment"]] = relationship(back_populates="user", uselist=True, lazy="selectin")
-    stars: Mapped[list["Star"]] = relationship(back_populates="user", uselist=True, lazy="selectin")
+    reports: Mapped[list["Report"]] = relationship(back_populates="user", uselist=True, lazy="selectin",
+                                                   cascade="all, delete-orphan")
+    comments: Mapped[list["Comment"]] = relationship(back_populates="user", uselist=True, lazy="selectin",
+                                                     cascade="all, delete-orphan")
+    stars: Mapped[list["Star"]] = relationship(back_populates="user", uselist=True, lazy="selectin",
+                                               cascade="all, delete-orphan")
 
     def to_dict(self) -> Dict[str, Any]:
         return {
