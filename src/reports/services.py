@@ -9,7 +9,7 @@ from src.users.models import User
 class ReportService:
     repository = ReportRepository()
 
-    async def create_report(self, report: ReportCreate, user_id: int) -> None:
+    async def create_report(self, report: ReportCreate, user_id: int) -> Report:
         return await self.repository.create_report(report, user_id)
 
     async def edit_report(self, report: Report, report_create: ReportCreate) -> None:

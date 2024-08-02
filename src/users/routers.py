@@ -30,10 +30,7 @@ async def authenticate_user_jwt(user: UserLogin = Depends(UserService().authenti
         "email": user.email,
     }
     token = encode_jwt(jwt_payload)
-    return Token(
-        access_token=token,
-        token_type="Bearer"
-    )
+    return Token(access_token=token, token_type="Bearer")
 
 
 @router.get("/self")

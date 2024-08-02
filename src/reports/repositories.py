@@ -1,3 +1,4 @@
+import random
 from typing import Optional, List
 
 from sqlalchemy import select, insert, delete, and_, update
@@ -9,13 +10,24 @@ from src.users.models import User
 
 
 class ReportRepository:
-    async def create_report(self, report: ReportCreate, user_id: int) -> None:
+
+    async def generate_id(self) -> int:
+        new_id = random.randint(10000000, 99999999)
+        while await self.get_report_by_id(new_id):
+            new_id = random.randint(10000000, 99999999)
+        return new_id
+
+    async def create_report(self, report: ReportCreate, user_id: int) -> Report:
         report_dc = report.dict()
         report_dc["user_id"] = user_id
+        report_dc["id"] = await self.generate_id()
         async with async_session() as session:
             stmt = insert(Report).values(**report_dc)
             await session.execute(stmt)
             await session.commit()
+
+            new_report: Report = await self.get_report_by_id(report_dc["id"])
+            return new_report
 
     async def edit_report(self, report: Report, report_create: ReportCreate) -> None:
         report_dc = report_create.dict()
