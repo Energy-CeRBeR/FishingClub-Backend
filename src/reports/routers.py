@@ -119,7 +119,7 @@ async def delete_report(current_user: Annotated[User, Depends(UserService().get_
     return {"success": "ok"}
 
 
-@router.post("/{report_id}/add_fish/")
+@router.post("/{report_id}/fish/")
 async def add_fish_to_report(
         current_user: Annotated[User, Depends(UserService().get_current_user)],
         fish: FishCreate,
@@ -131,5 +131,22 @@ async def add_fish_to_report(
         raise HTTPException(status_code=403, detail="Access error")
 
     await ReportService().add_fish_to_report(report, fish)
+
+    return {"success": "ok"}
+
+
+@router.delete("/{report_id}/fish/")
+async def delete_fish_from_report(
+        current_user: Annotated[User, Depends(UserService().get_current_user)],
+        fish_id: int,
+        report_id: int):
+    fish = await ReportService().get_fish_by_id(fish_id)
+    report = await ReportService().get_report_by_id(report_id)
+    if fish is None:
+        raise HTTPException(status_code=404, detail="Fish not found")
+    if fish.report_id != report_id or report.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Access error")
+
+    await ReportService().delete_fish_from_report(fish)
 
     return {"success": "ok"}
