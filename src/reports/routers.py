@@ -133,7 +133,7 @@ async def delete_report(
 @router.post("/{report_id}/fish/", response_model=ReportResponse)
 async def add_fish_to_report(
         current_user: Annotated[User, Depends(UserService().get_current_user)],
-        fish: FishCreate,
+        new_fish: FishCreate,
         report_id: int
 ) -> ReportResponse:
     report = await ReportService().get_report_by_id(report_id)
@@ -141,8 +141,10 @@ async def add_fish_to_report(
         raise HTTPException(status_code=404, detail="Report not found")
     if report.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Access error")
+    if any(fish.fish_type == new_fish.fish_type for fish in report.caught_fish):
+        raise HTTPException(status_code=400, detail="This fish already exists in the report")
 
-    await ReportService().add_fish_to_report(report, fish)
+    await ReportService().add_fish_to_report(report, new_fish)
 
     return ReportResponse(**report.to_dict())
 
