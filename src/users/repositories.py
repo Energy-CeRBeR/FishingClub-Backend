@@ -66,6 +66,10 @@ class UserRepository:
             query = select(User).where(User.id == user_id)
             result = await session.execute(query)
             user = result.scalars().first()
+
+        if user is None:
+            raise HTTPException(status_code=404, detail="User not found")
+
         return user
 
     async def delete_user(self, user: User) -> None:
