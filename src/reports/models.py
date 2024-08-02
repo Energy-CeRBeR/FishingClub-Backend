@@ -51,6 +51,7 @@ class CaughtFish(Base):
 
     def to_dict(self) -> Dict[str, Any]:
         return {
+            "id": self.id,
             "report_id": self.report_id,
             "fish_type": self.fish_type,
             "total_weight": self.total_weight,
@@ -67,6 +68,13 @@ class Image(Base):
 
     report: Mapped["Report"] = relationship(back_populates="images", uselist=False)
 
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "id": self.id,
+            "path": self.path,
+            "report_id": self.report_id,
+        }
+
 
 class Comment(Base):
     __tablename__ = "comments"
@@ -80,6 +88,15 @@ class Comment(Base):
     report: Mapped["Report"] = relationship(back_populates="comments", uselist=False)
     user: Mapped["User"] = relationship(back_populates="comments", uselist=False)
 
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "id": self.id,
+            "text": self.text,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "report_id": self.report_id,
+            "user_id": self.user_id,
+        }
+
 
 class Star(Base):
     __tablename__ = "stars"
@@ -91,11 +108,18 @@ class Star(Base):
     report: Mapped["Report"] = relationship(back_populates="stars", uselist=False)
     user: Mapped["User"] = relationship(back_populates="stars", uselist=False)
 
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "id": self.id,
+            "report_id": self.report_id,
+            "user_id": self.user_id,
+        }
+
 
 class Report(Base):
     __tablename__ = "reports"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column()
     description: Mapped[str] = mapped_column(nullable=True)
     tackle: Mapped[FishingTackle] = mapped_column()
@@ -111,3 +135,17 @@ class Report(Base):
     stars: Mapped[list["Star"]] = relationship(back_populates="report", uselist=True, lazy="selectin",
                                                cascade="all, delete-orphan")
     user: Mapped["User"] = relationship(back_populates="reports", uselist=False)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "id": self.id,
+            "title": self.title,
+            "description": self.description,
+            "tackle": self.tackle,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "user_id": self.user_id,
+            "caught_fish": [fish.to_dict() for fish in self.caught_fish],
+            "images": [image.to_dict() for image in self.images],
+            "comments": [comment.to_dict() for comment in self.comments],
+            "stars": [star.to_dict() for star in self.stars],
+        }

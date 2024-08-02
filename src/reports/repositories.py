@@ -1,21 +1,33 @@
+import random
 from typing import Optional, List
 
 from sqlalchemy import select, insert, delete, and_, update
 
 from src.database import async_session
 from src.reports.models import Report, Image, CaughtFish, Star, Comment
-from src.reports.schemas import ReportCreate, FishCreate
+from src.reports.schemas import ReportCreate, FishCreate, FishEdit
 from src.users.models import User
 
 
 class ReportRepository:
-    async def create_report(self, report: ReportCreate, user_id: int) -> None:
+
+    async def generate_id(self) -> int:
+        new_id = random.randint(10000000, 99999999)
+        while await self.get_report_by_id(new_id):
+            new_id = random.randint(10000000, 99999999)
+        return new_id
+
+    async def create_report(self, report: ReportCreate, user_id: int) -> Report:
         report_dc = report.dict()
         report_dc["user_id"] = user_id
+        report_dc["id"] = await self.generate_id()
         async with async_session() as session:
             stmt = insert(Report).values(**report_dc)
             await session.execute(stmt)
             await session.commit()
+
+            new_report: Report = await self.get_report_by_id(report_dc["id"])
+            return new_report
 
     async def edit_report(self, report: Report, report_create: ReportCreate) -> None:
         report_dc = report_create.dict()
@@ -84,6 +96,13 @@ class ReportRepository:
         fish_dc["report_id"] = report.id
         async with async_session() as session:
             stmt = insert(CaughtFish).values(**fish_dc)
+            await session.execute(stmt)
+            await session.commit()
+
+    async def edit_fish(self, fish: CaughtFish, edit_fish: FishEdit):
+        fish_dc = edit_fish.dict()
+        async with async_session() as session:
+            stmt = update(CaughtFish).where(CaughtFish.id == fish.id).values(**fish_dc)
             await session.execute(stmt)
             await session.commit()
 

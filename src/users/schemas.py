@@ -1,7 +1,14 @@
+from datetime import datetime
+from typing import List
+
 from pydantic import BaseModel
 
-from src.reports.models import Report
+from src.reports.schemas import ReportResponse
 from src.users.models import Gender
+
+
+class SuccessfulResponse(BaseModel):
+    success: str = "ok"
 
 
 class UserCreate(BaseModel):
@@ -19,15 +26,6 @@ class UserLogin:
     password: bytes
 
 
-class UserResponse(BaseModel):
-    name: str
-    surname: str
-    short_name: str
-    email: str
-    email_verified: bool
-    gender: Gender
-
-
 class TokenData(BaseModel):
     short_name: str | None = None
 
@@ -35,3 +33,15 @@ class TokenData(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+
+class UserResponse(BaseModel):
+    id: int
+    name: str
+    surname: str
+    short_name: str
+    email: str
+    email_verified: bool
+    gender: Gender
+    created_at: datetime
+    reports: List[ReportResponse]

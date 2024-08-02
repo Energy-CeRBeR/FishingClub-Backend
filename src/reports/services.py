@@ -2,14 +2,14 @@ from typing import List
 
 from src.reports.models import Report, CaughtFish, Comment
 from src.reports.repositories import ReportRepository
-from src.reports.schemas import ReportCreate, FishCreate
+from src.reports.schemas import ReportCreate, FishCreate, FishEdit
 from src.users.models import User
 
 
 class ReportService:
     repository = ReportRepository()
 
-    async def create_report(self, report: ReportCreate, user_id: int) -> None:
+    async def create_report(self, report: ReportCreate, user_id: int) -> Report:
         return await self.repository.create_report(report, user_id)
 
     async def edit_report(self, report: Report, report_create: ReportCreate) -> None:
@@ -32,6 +32,9 @@ class ReportService:
 
     async def add_fish_to_report(self, report: Report, fish: FishCreate):
         return await self.repository.add_fish(fish, report)
+
+    async def edit_fish_in_report(self, fish: CaughtFish, edit_fish: FishEdit):
+        return await self.repository.edit_fish(fish, edit_fish)
 
     async def delete_fish_from_report(self, fish: CaughtFish):
         return await self.repository.delete_fish(fish)

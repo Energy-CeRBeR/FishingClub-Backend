@@ -41,10 +41,16 @@ class User(Base):
 
     def to_dict(self) -> Dict[str, Any]:
         return {
+            "id": self.id,
             "name": self.name,
             "surname": self.surname,
             "short_name": self.short_name,
             "email": self.email,
             "email_verified": self.email_verified,
-            "gender": self.gender,
+            "gender": self.gender.value,
+            "role": self.role.value,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "reports": [report.to_dict() for report in self.reports],
+            "comments": [comment.to_dict() for comment in self.comments],
+            "stars": [star.to_dict() for star in self.stars],
         }

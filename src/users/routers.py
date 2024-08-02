@@ -3,9 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 
 from config_data.config import Config, load_config
-from src.reports.services import ReportService
 from src.users.models import User
-from src.users.schemas import UserCreate, Token, UserLogin, UserResponse
+from src.users.schemas import UserCreate, Token, UserLogin, UserResponse, SuccessfulResponse
 from src.users.services import UserService
 from src.utils.auth_settings import encode_jwt
 
@@ -30,36 +29,27 @@ async def authenticate_user_jwt(user: UserLogin = Depends(UserService().authenti
         "email": user.email,
     }
     token = encode_jwt(jwt_payload)
-    return Token(
-        access_token=token,
-        token_type="Bearer"
-    )
+    return Token(access_token=token, token_type="Bearer")
 
 
-@router.get("/self")
+@router.get("/self", response_model=UserResponse)
 async def login_for_access_token(
         current_user: Annotated[User, Depends(UserService().get_current_user)]
-):
-    return {
-        "data": UserResponse(**current_user.to_dict()),
-        "reports": ReportService().reports_to_dict(current_user.reports)
-    }
+) -> UserResponse:
+    return UserResponse(**current_user.to_dict())
 
 
-@router.get("/{user_id}")
-async def get_user_by_id(user_id: int):
+@router.get("/{user_id}", response_model=UserResponse)
+async def get_user_by_id(user_id: int) -> UserResponse:
     user = await UserService().get_user_by_id(user_id)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    return {
-        "data": UserResponse(**user.to_dict()),
-        "reports": ReportService().reports_to_dict(user.reports)
-    }
+    return UserResponse(**user.to_dict())
 
 
-@router.delete("")
+@router.delete("", response_model=SuccessfulResponse)
 async def delete_user(
         current_user: Annotated[User, Depends(UserService().get_current_user)]
-):
+) -> SuccessfulResponse:
     await UserService().delete_user(current_user)
-    return {"success": "ok"}
+    return SuccessfulResponse()
