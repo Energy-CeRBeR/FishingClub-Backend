@@ -1,6 +1,9 @@
+from datetime import datetime
+from typing import List
+
 from pydantic import BaseModel
 
-from src.reports.models import Report
+from src.reports.schemas import ReportResponse
 from src.users.models import Gender
 
 
@@ -23,16 +26,6 @@ class UserLogin:
     password: bytes
 
 
-class UserResponse(BaseModel):
-    id: int
-    name: str
-    surname: str
-    short_name: str
-    email: str
-    email_verified: bool
-    gender: Gender
-
-
 class TokenData(BaseModel):
     short_name: str | None = None
 
@@ -41,15 +34,14 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
-# class User(BaseModel):
-#     user_id: int
-#     name: str
-#     surname: str
-#     short_name: str
-#     email: str
-#     email_verified: bool
-#     gender: Gender
-#     created_at: Optional[datetime] = Field(None, alias="createdAt")
-#     reports: List[Report] = []
-#     comments: List[Comment] = []
-#     stars: List[Star] = []
+
+class UserResponse(BaseModel):
+    id: int
+    name: str
+    surname: str
+    short_name: str
+    email: str
+    email_verified: bool
+    gender: Gender
+    created_at: datetime
+    reports: List[ReportResponse]

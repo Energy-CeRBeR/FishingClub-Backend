@@ -101,7 +101,8 @@ async def comment_report(
 @router.delete("/comment", response_model=SuccessfulResponse)
 async def delete_comment(
         current_user: Annotated[User, Depends(UserService().get_current_user)],
-        comment_id: int) -> SuccessfulResponse:
+        comment_id: int
+) -> SuccessfulResponse:
     comment = await ReportService().get_comment_by_id(comment_id)
     if comment is None:
         raise HTTPException(status_code=404, detail="Comment not found")
