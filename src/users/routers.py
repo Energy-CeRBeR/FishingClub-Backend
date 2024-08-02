@@ -42,8 +42,6 @@ async def login_for_access_token(
 @router.get("/{user_id}", response_model=UserResponse)
 async def get_user_by_id(user_id: int) -> UserResponse:
     user = await UserService().get_user_by_id(user_id)
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
     return UserResponse(**user.to_dict())
 
 
