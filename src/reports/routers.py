@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from src.reports.schemas import ReportCreate, FishCreate
+from src.reports.schemas import ReportCreate, FishCreate, FishEdit
 from src.reports.services import ReportService
 from src.users.models import User
 from src.users.services import UserService
@@ -131,6 +131,24 @@ async def add_fish_to_report(
         raise HTTPException(status_code=403, detail="Access error")
 
     await ReportService().add_fish_to_report(report, fish)
+
+    return {"success": "ok"}
+
+
+@router.put("/{report_id}/fish/")
+async def edit_fish_in_report(
+        current_user: Annotated[User, Depends(UserService().get_current_user)],
+        edit_fish: FishEdit,
+        fish_id: int,
+        report_id: int):
+    fish = await ReportService().get_fish_by_id(fish_id)
+    report = await ReportService().get_report_by_id(report_id)
+    if fish is None:
+        raise HTTPException(status_code=404, detail="Fish not found")
+    if fish.report_id != report_id or report.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Access error")
+
+    await ReportService().edit_fish_in_report(fish, edit_fish)
 
     return {"success": "ok"}
 

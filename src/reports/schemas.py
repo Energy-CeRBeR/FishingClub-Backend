@@ -22,3 +22,8 @@ class FishCreate(BaseModel):
     fish_type: RiverFish
     total_weight: float
     total_count: int
+
+
+class FishEdit(BaseModel):
+    total_weight: float
+    total_count: int
