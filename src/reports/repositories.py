@@ -86,3 +86,16 @@ class ReportRepository:
             stmt = insert(CaughtFish).values(**fish_dc)
             await session.execute(stmt)
             await session.commit()
+
+    async def delete_fish(self, fish: CaughtFish):
+        async with async_session() as session:
+            stmt = delete(CaughtFish).where(CaughtFish.id == fish.id)
+            await session.execute(stmt)
+            await session.commit()
+
+    async def get_fish_by_id(self, fish_id: int) -> CaughtFish:
+        async with async_session() as session:
+            stmt = select(CaughtFish).where(CaughtFish.id == fish_id)
+            result = await session.execute(stmt)
+            fish = result.scalars().first()
+        return fish

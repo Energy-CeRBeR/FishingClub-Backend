@@ -33,6 +33,12 @@ class ReportService:
     async def add_fish_to_report(self, report: Report, fish: FishCreate):
         return await self.repository.add_fish(fish, report)
 
+    async def delete_fish_from_report(self, fish: CaughtFish):
+        return await self.repository.delete_fish(fish)
+
+    async def get_fish_by_id(self, fish_id: int) -> CaughtFish:
+        return await self.repository.get_fish_by_id(fish_id)
+
     async def stared_report(self, report: Report, user: User):
         flag = self.is_stared(report, user)
         return await self.repository.stared_report(report, user, flag)
