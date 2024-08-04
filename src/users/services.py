@@ -7,7 +7,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from config_data.config import Config, load_config
 from src.users.models import User
 from src.users.repositories import UserRepository
-from src.users.schemas import UserCreate, TokenData
+from src.users.schemas import UserCreate, TokenData, UserEdit
 from src.utils.auth_settings import validate_password, decode_jwt
 
 # oauth2_scheme = OAuth2PasswordBearer(tokenUrl="user/login")
@@ -66,6 +66,9 @@ class UserService:
 
     async def create_user(self, user: UserCreate) -> User:
         return await self.repository.create_user(user)
+
+    async def edit_user_info(self, user: User, user_edit: UserEdit) -> User:
+        return await self.repository.edit_info(user, user_edit)
 
     async def edit_user_password(self, user: User, password: str) -> None:
         return await self.repository.edit_password(user, password)

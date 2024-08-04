@@ -5,7 +5,7 @@ from sqlalchemy import insert, select, delete, update
 
 from src.utils import auth_settings
 from src.users.models import User
-from src.users.schemas import UserCreate
+from src.users.schemas import UserCreate, UserEdit
 
 from fastapi import HTTPException
 
@@ -60,6 +60,15 @@ class UserRepository:
             stmt = update(User).where(User.id == user.id).values(password_hash=new_hashed_password)
             await session.execute(stmt)
             await session.commit()
+
+    async def edit_info(self, user: User, user_edit: UserEdit) -> User:
+        async with async_session() as session:
+            stmt = update(User).where(User.id == user.id).values(**user_edit.dict())
+            await session.execute(stmt)
+            await session.commit()
+
+        upd_user = await self.get_user_by_id(user.id)
+        return upd_user
 
     async def get_user_by_email(self, email: str) -> Optional[User]:
         async with async_session() as session:
