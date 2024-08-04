@@ -12,8 +12,8 @@ class ReportService:
     async def create_report(self, report: ReportCreate, user_id: int) -> Report:
         return await self.repository.create_report(report, user_id)
 
-    async def edit_report(self, report: Report, report_create: ReportCreate) -> None:
-        await self.repository.edit_report(report, report_create)
+    async def edit_report(self, report: Report, report_create: ReportCreate) -> Report:
+        return await self.repository.edit_report(report, report_create)
 
     async def get_all_reports(self) -> List[Report]:
         return await self.repository.get_all_reports()
@@ -30,26 +30,26 @@ class ReportService:
     async def delete_report(self, report: Report) -> None:
         return await self.repository.delete_report(report)
 
-    async def add_fish_to_report(self, report: Report, fish: FishCreate):
+    async def add_fish_to_report(self, report: Report, fish: FishCreate) -> Report:
         return await self.repository.add_fish(fish, report)
 
-    async def edit_fish_in_report(self, fish: CaughtFish, edit_fish: FishEdit):
-        return await self.repository.edit_fish(fish, edit_fish)
+    async def edit_fish_in_report(self, fish: CaughtFish, edit_fish: FishEdit, report: Report) -> Report:
+        return await self.repository.edit_fish(fish, edit_fish, report)
 
-    async def delete_fish_from_report(self, fish: CaughtFish):
+    async def delete_fish_from_report(self, fish: CaughtFish) -> None:
         return await self.repository.delete_fish(fish)
 
     async def get_fish_by_id(self, fish_id: int) -> CaughtFish:
         return await self.repository.get_fish_by_id(fish_id)
 
-    async def stared_report(self, report: Report, user: User):
+    async def stared_report(self, report: Report, user: User) -> Report:
         flag = self.is_stared(report, user)
         return await self.repository.stared_report(report, user, flag)
 
-    async def comment_report(self, report: Report, user: User, text: str):
+    async def comment_report(self, report: Report, user: User, text: str) -> Report:
         return await self.repository.comment_report(report, user, text)
 
-    async def delete_comment(self, comment: Comment):
+    async def delete_comment(self, comment: Comment) -> None:
         return await self.repository.delete_comment(comment)
 
     @staticmethod

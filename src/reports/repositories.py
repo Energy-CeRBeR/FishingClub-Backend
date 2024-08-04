@@ -4,7 +4,7 @@ from typing import Optional, List
 from sqlalchemy import select, insert, delete, and_, update
 
 from src.database import async_session
-from src.reports.models import Report, Image, CaughtFish, Star, Comment
+from src.reports.models import Report, CaughtFish, Star, Comment
 from src.reports.schemas import ReportCreate, FishCreate, FishEdit
 from src.users.models import User
 
@@ -29,12 +29,15 @@ class ReportRepository:
             new_report: Report = await self.get_report_by_id(report_dc["id"])
             return new_report
 
-    async def edit_report(self, report: Report, report_create: ReportCreate) -> None:
+    async def edit_report(self, report: Report, report_create: ReportCreate) -> Report:
         report_dc = report_create.dict()
         async with async_session() as session:
             stmt = update(Report).where(Report.id == report.id).values(**report_dc)
             await session.execute(stmt)
             await session.commit()
+
+            upd_report: Report = await self.get_report_by_id(report.id)
+            return upd_report
 
     async def get_all_reports(self) -> List[Report]:
         async with async_session() as session:
@@ -70,7 +73,7 @@ class ReportRepository:
             await session.execute(stmt)
             await session.commit()
 
-    async def stared_report(self, report: Report, user: User, flag: bool) -> None:
+    async def stared_report(self, report: Report, user: User, flag: bool) -> Report:
         async with async_session() as session:
             if not flag:
                 stmt = insert(Star).values(user_id=user.id, report_id=report.id)
@@ -79,11 +82,17 @@ class ReportRepository:
             await session.execute(stmt)
             await session.commit()
 
-    async def comment_report(self, report: Report, user: User, text: str) -> None:
+            upd_report: Report = await self.get_report_by_id(report.id)
+            return upd_report
+
+    async def comment_report(self, report: Report, user: User, text: str) -> Report:
         async with async_session() as session:
             stmt = insert(Comment).values(user_id=user.id, report_id=report.id, text=text)
             await session.execute(stmt)
             await session.commit()
+
+            upd_report: Report = await self.get_report_by_id(report.id)
+            return upd_report
 
     async def delete_comment(self, comment: Comment) -> None:
         async with async_session() as session:
@@ -91,7 +100,7 @@ class ReportRepository:
             await session.execute(stmt)
             await session.commit()
 
-    async def add_fish(self, fish: FishCreate, report: Report) -> None:
+    async def add_fish(self, fish: FishCreate, report: Report) -> Report:
         fish_dc = fish.dict()
         fish_dc["report_id"] = report.id
         async with async_session() as session:
@@ -99,14 +108,20 @@ class ReportRepository:
             await session.execute(stmt)
             await session.commit()
 
-    async def edit_fish(self, fish: CaughtFish, edit_fish: FishEdit):
+            upd_report: Report = await self.get_report_by_id(report.id)
+            return upd_report
+
+    async def edit_fish(self, fish: CaughtFish, edit_fish: FishEdit, report: Report) -> Report:
         fish_dc = edit_fish.dict()
         async with async_session() as session:
             stmt = update(CaughtFish).where(CaughtFish.id == fish.id).values(**fish_dc)
             await session.execute(stmt)
             await session.commit()
 
-    async def delete_fish(self, fish: CaughtFish):
+            upd_report: Report = await self.get_report_by_id(report.id)
+            return upd_report
+
+    async def delete_fish(self, fish: CaughtFish) -> None:
         async with async_session() as session:
             stmt = delete(CaughtFish).where(CaughtFish.id == fish.id)
             await session.execute(stmt)

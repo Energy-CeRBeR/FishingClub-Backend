@@ -31,9 +31,9 @@ async def edit_report(
     if report.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="You are not the owner of this report")
 
-    await ReportService().edit_report(report, report_create)
+    upd_report = await ReportService().edit_report(report, report_create)
 
-    return ReportResponse(**report.to_dict())
+    return ReportResponse(**upd_report.to_dict())
 
 
 @router.delete("/{report_id}/delete", response_model=SuccessfulResponse)
@@ -78,9 +78,9 @@ async def stared_report(
     if report.user_id == current_user.id:
         raise HTTPException(status_code=403, detail="You can't star your own report")
 
-    await ReportService().stared_report(report, current_user)
+    upd_report = await ReportService().stared_report(report, current_user)
 
-    return ReportResponse(**report.to_dict())
+    return ReportResponse(**upd_report.to_dict())
 
 
 @router.post("/{report_id}/comment", response_model=ReportResponse)
@@ -93,9 +93,9 @@ async def comment_report(
     if report is None:
         raise HTTPException(status_code=404, detail="Report not found")
 
-    await ReportService().comment_report(report, current_user, comment)
+    commented_report = await ReportService().comment_report(report, current_user, comment)
 
-    return ReportResponse(**report.to_dict())
+    return ReportResponse(**commented_report.to_dict())
 
 
 @router.delete("/comment", response_model=SuccessfulResponse)
@@ -144,9 +144,9 @@ async def add_fish_to_report(
     if any(fish.fish_type == new_fish.fish_type for fish in report.caught_fish):
         raise HTTPException(status_code=400, detail="This fish already exists in the report")
 
-    await ReportService().add_fish_to_report(report, new_fish)
+    upd_report = await ReportService().add_fish_to_report(report, new_fish)
 
-    return ReportResponse(**report.to_dict())
+    return ReportResponse(**upd_report.to_dict())
 
 
 @router.put("/{report_id}/fish/", response_model=ReportResponse)
@@ -163,9 +163,9 @@ async def edit_fish_in_report(
     if fish.report_id != report_id or report.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Access error")
 
-    await ReportService().edit_fish_in_report(fish, edit_fish)
+    upd_report = await ReportService().edit_fish_in_report(fish, edit_fish, report)
 
-    return ReportResponse(**report.to_dict())
+    return ReportResponse(**upd_report.to_dict())
 
 
 @router.delete("/{report_id}/fish/", response_model=SuccessfulResponse)
