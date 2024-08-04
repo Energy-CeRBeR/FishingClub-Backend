@@ -20,6 +20,12 @@ class UserCreate(BaseModel):
     password: str
 
 
+class UserEdit(BaseModel):
+    name: str
+    surname: str
+    gender: Gender
+
+
 class UserLogin:
     short_name: str
     email: str

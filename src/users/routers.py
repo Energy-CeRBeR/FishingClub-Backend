@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 
 from config_data.config import Config, load_config
 from src.users.models import User
-from src.users.schemas import UserCreate, Token, UserLogin, UserResponse, SuccessfulResponse
+from src.users.schemas import UserCreate, Token, UserLogin, UserResponse, SuccessfulResponse, UserEdit
 from src.users.services import UserService
 from src.utils.auth_settings import encode_jwt
 
@@ -32,6 +32,15 @@ async def authenticate_user_jwt(user: UserLogin = Depends(UserService().authenti
     return Token(access_token=token, token_type="Bearer")
 
 
+@router.post("/edit_password", response_model=SuccessfulResponse)
+async def edit_user_password(
+        current_user: Annotated[User, Depends(UserService().get_current_user)],
+        new_password: str
+) -> SuccessfulResponse:
+    await UserService().edit_user_password(current_user, new_password)
+    return SuccessfulResponse()
+
+
 @router.get("/self", response_model=UserResponse)
 async def login_for_access_token(
         current_user: Annotated[User, Depends(UserService().get_current_user)]
@@ -43,6 +52,15 @@ async def login_for_access_token(
 async def get_user_by_id(user_id: int) -> UserResponse:
     user = await UserService().get_user_by_id(user_id)
     return UserResponse(**user.to_dict())
+
+
+@router.put("/edit", response_model=UserResponse)
+async def edit_user(
+        current_user: Annotated[User, Depends(UserService().get_current_user)],
+        user_edit: UserEdit
+) -> UserResponse:
+    upd_user = await UserService().edit_user_info(current_user, user_edit)
+    return UserResponse(**upd_user.to_dict())
 
 
 @router.delete("", response_model=SuccessfulResponse)
