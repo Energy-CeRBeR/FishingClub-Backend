@@ -1,6 +1,6 @@
 import jwt
 
-from typing import Annotated
+from typing import Annotated, Optional
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
@@ -20,7 +20,7 @@ auth_config = settings.authJWT
 class UserService:
     repository = UserRepository()
 
-    async def authenticate_user(self, email: str, password: str) -> User | None:
+    async def authenticate_user(self, email: str, password: str) -> Optional[User]:
         credentials_exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
@@ -34,9 +34,6 @@ class UserService:
             raise credentials_exception
 
         return user
-
-    async def authenticate_user_by_token(self, token: str) -> User | None:
-        pass
 
     async def get_current_user(self, token: HTTPAuthorizationCredentials = Depends(http_bearer)) -> User:
         credentials_exception = HTTPException(
@@ -61,7 +58,7 @@ class UserService:
 
         return user
 
-    async def get_user_by_id(self, user_id: int):
+    async def get_user_by_id(self, user_id: int) -> User:
         return await self.repository.get_user_by_id(user_id)
 
     async def create_user(self, user: UserCreate) -> User:
