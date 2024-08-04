@@ -21,7 +21,7 @@ class Gender(Enum):
 class User(Base):
     __tablename__ = "users"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column()
     surname: Mapped[str] = mapped_column()
     short_name: Mapped[str] = mapped_column(unique=True)

@@ -1,3 +1,4 @@
+import random
 from typing import Optional
 
 from sqlalchemy import insert, select, delete
@@ -12,6 +13,11 @@ from src.database import async_session
 
 
 class UserRepository:
+    async def generate_id(self) -> int:
+        new_id = random.randint(10000000, 99999999)
+        while await self.get_user_by_id(new_id):
+            new_id = random.randint(10000000, 99999999)
+        return new_id
 
     async def create_user(self, user: UserCreate) -> User:
         async with async_session() as session:
@@ -35,13 +41,14 @@ class UserRepository:
         password = user.password
         user_dc = user.dict(exclude={"password"})
         user_dc["password_hash"] = auth_settings.hash_password(password)
+        user_dc["id"] = await self.generate_id()
 
         async with async_session() as session:
             stmt = insert(User).values(**user_dc)
             await session.execute(stmt)
             await session.commit()
 
-            query = select(User).where(User.short_name == user.short_name)
+            query = select(User).where(User.id == user_dc["id"])
             result = await session.execute(query)
             user = result.scalars().first()
 
@@ -66,9 +73,6 @@ class UserRepository:
             query = select(User).where(User.id == user_id)
             result = await session.execute(query)
             user = result.scalars().first()
-
-        if user is None:
-            raise HTTPException(status_code=404, detail="User not found")
 
         return user
 
