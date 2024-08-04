@@ -32,6 +32,15 @@ async def authenticate_user_jwt(user: UserLogin = Depends(UserService().authenti
     return Token(access_token=token, token_type="Bearer")
 
 
+@router.post("/edit_password")
+async def edit_user_password(
+        current_user: Annotated[User, Depends(UserService().get_current_user)],
+        new_password: str
+) -> SuccessfulResponse:
+    await UserService().edit_user_password(current_user, new_password)
+    return SuccessfulResponse()
+
+
 @router.get("/self", response_model=UserResponse)
 async def login_for_access_token(
         current_user: Annotated[User, Depends(UserService().get_current_user)]

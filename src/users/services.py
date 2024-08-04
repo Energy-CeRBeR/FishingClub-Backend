@@ -67,5 +67,8 @@ class UserService:
     async def create_user(self, user: UserCreate) -> User:
         return await self.repository.create_user(user)
 
+    async def edit_user_password(self, user: User, password: str) -> None:
+        return await self.repository.edit_password(user, password)
+
     async def delete_user(self, user: User) -> None:
         return await self.repository.delete_user(user)

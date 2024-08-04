@@ -1,7 +1,7 @@
 import random
 from typing import Optional
 
-from sqlalchemy import insert, select, delete
+from sqlalchemy import insert, select, delete, update
 
 from src.utils import auth_settings
 from src.users.models import User
@@ -53,6 +53,13 @@ class UserRepository:
             user = result.scalars().first()
 
         return user
+
+    async def edit_password(self, user: User, password: str) -> None:
+        async with async_session() as session:
+            new_hashed_password = auth_settings.hash_password(password)
+            stmt = update(User).where(User.id == user.id).values(password_hash=new_hashed_password)
+            await session.execute(stmt)
+            await session.commit()
 
     async def get_user_by_email(self, email: str) -> Optional[User]:
         async with async_session() as session:
