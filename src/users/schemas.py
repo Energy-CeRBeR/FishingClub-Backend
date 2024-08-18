@@ -26,10 +26,10 @@ class UserEdit(BaseModel):
     gender: Gender
 
 
-class UserLogin:
-    short_name: str
-    email: str
-    password: bytes
+# class UserLogin:
+#     short_name: str
+#     email: str
+#     password: bytes
 
 
 class TokenData(BaseModel):
@@ -38,7 +38,8 @@ class TokenData(BaseModel):
 
 class Token(BaseModel):
     access_token: str
-    token_type: str
+    refresh_token: str | None = None
+    token_type: str = "Bearer"
 
 
 class UserResponse(BaseModel):
