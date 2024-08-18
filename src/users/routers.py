@@ -4,9 +4,8 @@ from fastapi import APIRouter, Depends
 
 from config_data.config import Config, load_config
 from src.users.models import User
-from src.users.schemas import UserCreate, Token, UserLogin, UserResponse, SuccessfulResponse, UserEdit
+from src.users.schemas import UserCreate, Token, UserResponse, SuccessfulResponse, UserEdit
 from src.users.services import UserService
-from src.utils.auth_settings import encode_jwt
 
 router = APIRouter(tags=["user"], prefix="/user")
 
@@ -17,19 +16,24 @@ auth_config = settings.authJWT
 @router.post("/register")
 async def register(user_create: UserCreate) -> Token:
     user = await UserService().create_user(user_create)
-    access_token = encode_jwt(payload={"sub": user.short_name})
-    return Token(access_token=access_token, token_type="Bearer")
+    access_token = UserService().create_access_token(user)
+    refresh_token = UserService().create_refresh_token(user)
+    return Token(access_token=access_token, refresh_token=refresh_token)
 
 
 @router.post("/login", response_model=Token)
-async def authenticate_user_jwt(user: UserLogin = Depends(UserService().authenticate_user)) -> Token:
-    jwt_payload = {
-        "sub": user.short_name,
-        "short_name": user.short_name,
-        "email": user.email,
-    }
-    token = encode_jwt(jwt_payload)
-    return Token(access_token=token, token_type="Bearer")
+async def authenticate_user_jwt(user: User = Depends(UserService().authenticate_user)) -> Token:
+    access_token = UserService().create_access_token(user)
+    refresh_token = UserService().create_refresh_token(user)
+    return Token(access_token=access_token, refresh_token=refresh_token)
+
+
+@router.post("/refresh", response_model=Token, response_model_exclude_none=True)
+async def refresh_jwt(
+        user: Annotated[User, Depends(UserService().get_current_user_for_refresh)]
+) -> Token:
+    access_token = UserService().create_access_token(user)
+    return Token(access_token=access_token)
 
 
 @router.post("/edit_password", response_model=SuccessfulResponse)
