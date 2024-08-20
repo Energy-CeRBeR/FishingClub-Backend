@@ -78,25 +78,30 @@ class UserService:
 
         return user
 
-    async def get_current_user_for_refresh(self, token: HTTPAuthorizationCredentials = Depends(http_bearer)) -> User:
+    async def validate_user(
+            self,
+            expected_token_type: str,
+            token: str | bytes,
+    ) -> User:
         credentials_exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
         try:
-            token = token.credentials
             payload = decode_jwt(token=token)
             token_type = payload.get(TOKEN_TYPE_FIELD)
-            if token_type != REFRESH_TOKEN_TYPE:
+            if token_type != expected_token_type:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail=f"Invalid token type {token_type!r} expected {REFRESH_TOKEN_TYPE!r}"
+                    detail=f"Invalid token type {token_type!r} expected {expected_token_type!r}"
                 )
             short_name: str = payload.get("sub")
             if short_name is None:
                 raise credentials_exception
             token_data = TokenData(short_name=short_name)
+
         except jwt.DecodeError:
             raise credentials_exception
         except jwt.ExpiredSignatureError:
@@ -106,35 +111,12 @@ class UserService:
             raise credentials_exception
 
         return user
+
+    async def get_current_user_for_refresh(self, token: HTTPAuthorizationCredentials = Depends(http_bearer)) -> User:
+        return await self.validate_user(expected_token_type=REFRESH_TOKEN_TYPE, token=token.credentials)
 
     async def get_current_user(self, token: HTTPAuthorizationCredentials = Depends(http_bearer)) -> User:
-        credentials_exception = HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-        try:
-            token = token.credentials
-            payload = decode_jwt(token=token)
-            token_type = payload.get(TOKEN_TYPE_FIELD)
-            if token_type != ACCESS_TOKEN_TYPE:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail=f"Invalid token type {token_type!r} expected {ACCESS_TOKEN_TYPE!r}"
-                )
-            short_name: str = payload.get("sub")
-            if short_name is None:
-                raise credentials_exception
-            token_data = TokenData(short_name=short_name)
-        except jwt.DecodeError:
-            raise credentials_exception
-        except jwt.ExpiredSignatureError:
-            raise credentials_exception
-        user = await self.repository.get_user_by_short_name(token_data.short_name)
-        if user is None:
-            raise credentials_exception
-
-        return user
+        return await self.validate_user(expected_token_type=ACCESS_TOKEN_TYPE, token=token.credentials)
 
     async def get_user_by_id(self, user_id: int) -> User:
         user = await self.repository.get_user_by_id(user_id)

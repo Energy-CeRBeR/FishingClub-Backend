@@ -2,15 +2,11 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
-from config_data.config import Config, load_config
 from src.users.models import User
 from src.users.schemas import UserCreate, Token, UserResponse, SuccessfulResponse, UserEdit
 from src.users.services import UserService
 
 router = APIRouter(tags=["user"], prefix="/user")
-
-settings: Config = load_config(".env")
-auth_config = settings.authJWT
 
 
 @router.post("/register")

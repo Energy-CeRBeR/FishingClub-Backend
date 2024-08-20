@@ -4,7 +4,7 @@ from typing import List
 from pydantic import BaseModel
 
 from src.reports.schemas import ReportResponse
-from src.users.models import Gender
+from src.users.models import Gender, Roles
 
 
 class SuccessfulResponse(BaseModel):
@@ -26,12 +26,6 @@ class UserEdit(BaseModel):
     gender: Gender
 
 
-# class UserLogin:
-#     short_name: str
-#     email: str
-#     password: bytes
-
-
 class TokenData(BaseModel):
     short_name: str | None = None
 
@@ -48,7 +42,9 @@ class UserResponse(BaseModel):
     surname: str
     short_name: str
     email: str
-    email_verified: bool
+    is_verified: bool
+    is_active: bool
+    role: Roles
     gender: Gender
     created_at: datetime
     reports: List[ReportResponse]
