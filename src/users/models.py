@@ -26,7 +26,8 @@ class User(Base):
     surname: Mapped[str] = mapped_column()
     short_name: Mapped[str] = mapped_column(unique=True)
     email: Mapped[str] = mapped_column(unique=True)
-    email_verified: Mapped[bool] = mapped_column(default=False)
+    is_verified: Mapped[bool] = mapped_column(default=False)
+    is_active: Mapped[bool] = mapped_column(default=True)
     password_hash: Mapped[bytes] = mapped_column()
     gender: Mapped[Gender] = mapped_column(default=Gender.male)
     role: Mapped[Roles] = mapped_column(default=Roles.user)
@@ -46,7 +47,8 @@ class User(Base):
             "surname": self.surname,
             "short_name": self.short_name,
             "email": self.email,
-            "email_verified": self.email_verified,
+            "is_verified": self.is_verified,
+            "is_active": self.is_active,
             "gender": self.gender.value,
             "role": self.role.value,
             "created_at": self.created_at.isoformat() if self.created_at else None,
