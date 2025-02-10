@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from src.reports.schemas import ReportCreate, FishCreate, FishEdit, ReportResponse, SuccessfulResponse
+from src.reports.schemas import ReportCreate, FishCreate, FishEdit, ReportResponse, SuccessfulResponse, ReportEdit
 from src.reports.services import ReportService
 from src.users.models import User
 from src.users.services import UserService
@@ -22,17 +22,10 @@ async def create_report(
 @router.put("/{report_id}/edit", response_model=ReportResponse)
 async def edit_report(
         report_id: int,
-        report_create: ReportCreate,
+        edited_report: ReportEdit,
         current_user: Annotated[User, Depends(UserService().get_current_user)]
 ) -> ReportResponse:
-    report = await ReportService().get_report_by_id(report_id)
-    if report is None:
-        raise HTTPException(status_code=404, detail="Report not found")
-    if report.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="You are not the owner of this report")
-
-    upd_report = await ReportService().edit_report(report, report_create)
-
+    upd_report = await ReportService().edit_report(report_id, edited_report, current_user)
     return ReportResponse(**upd_report.to_dict())
 
 
@@ -41,14 +34,7 @@ async def delete_report(
         report_id: int,
         current_user: Annotated[User, Depends(UserService().get_current_user)]
 ) -> SuccessfulResponse:
-    report = await ReportService().get_report_by_id(report_id)
-    if report is None:
-        raise HTTPException(status_code=404, detail="Report not found")
-    if report.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="You are not the owner of this report")
-
-    await ReportService().delete_report(report)
-
+    await ReportService().delete_report(report_id, current_user)
     return SuccessfulResponse()
 
 
@@ -61,9 +47,6 @@ async def get_all_reports() -> list[ReportResponse]:
 @router.get("/{report_id}", response_model=ReportResponse)
 async def get_report_by_id(report_id: int) -> ReportResponse:
     report = await ReportService().get_report_by_id(report_id)
-    if report is None:
-        raise HTTPException(status_code=404, detail="Report not found")
-
     return ReportResponse(**report.to_dict())
 
 
@@ -110,22 +93,6 @@ async def delete_comment(
         raise HTTPException(status_code=403, detail="Access error")
 
     await ReportService().delete_comment(comment)
-
-    return SuccessfulResponse()
-
-
-@router.delete("/{report_id}", response_model=SuccessfulResponse)
-async def delete_report(
-        current_user: Annotated[User, Depends(UserService().get_current_user)],
-        report_id: int
-) -> SuccessfulResponse:
-    report = await ReportService().get_report_by_id(report_id)
-    if report is None:
-        raise HTTPException(status_code=404, detail="Report not found")
-    if report.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Access error")
-
-    await ReportService().delete_report(report)
 
     return SuccessfulResponse()
 

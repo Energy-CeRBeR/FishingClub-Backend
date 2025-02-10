@@ -1,8 +1,10 @@
 from typing import List
 
+from src.reports.exceptions import NotFoundException
 from src.reports.models import Report, CaughtFish, Comment
 from src.reports.repositories import ReportRepository
-from src.reports.schemas import ReportCreate, FishCreate, FishEdit
+from src.reports.schemas import ReportCreate, FishCreate, FishEdit, ReportEdit
+
 from src.users.models import User
 
 
@@ -12,8 +14,12 @@ class ReportService:
     async def create_report(self, report: ReportCreate, user_id: int) -> Report:
         return await self.repository.create_report(report, user_id)
 
-    async def edit_report(self, report: Report, report_create: ReportCreate) -> Report:
-        return await self.repository.edit_report(report, report_create)
+    async def edit_report(self, report_id: int, edited_report: ReportEdit, user: User) -> Report:
+        report = await self.get_report_by_id(report_id)
+        if report.user_id != user.id:
+            raise NotFoundException()
+
+        return await self.repository.edit_report(report, edited_report)
 
     async def get_all_reports(self) -> List[Report]:
         return await self.repository.get_all_reports()
@@ -22,12 +28,20 @@ class ReportService:
         return await self.repository.get_all_user_reports(user_id)
 
     async def get_report_by_id(self, report_id: int) -> Report:
-        return await self.repository.get_report_by_id(report_id)
+        report = await self.repository.get_report_by_id(report_id)
+        if report is None:
+            raise NotFoundException()
+
+        return report
 
     async def get_comment_by_id(self, comment_id: int) -> Comment:
         return await self.repository.get_comment_by_id(comment_id)
 
-    async def delete_report(self, report: Report) -> None:
+    async def delete_report(self, report_id: int, user: User) -> None:
+        report = await self.get_report_by_id(report_id)
+        if report.user_id != user.id:
+            raise NotFoundException()
+
         return await self.repository.delete_report(report)
 
     async def add_fish_to_report(self, report: Report, fish: FishCreate) -> Report:
