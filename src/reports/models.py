@@ -43,9 +43,9 @@ class CaughtFish(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     report_id: Mapped[int] = mapped_column(ForeignKey("reports.id", ondelete="CASCADE"))
-    fish_type: Mapped[RiverFish] = mapped_column()
-    total_weight: Mapped[float] = mapped_column()
-    total_count: Mapped[int] = mapped_column()
+    fish_type: Mapped[RiverFish] = mapped_column(nullable=False)
+    total_weight: Mapped[float] = mapped_column(default=0, nullable=False)
+    total_count: Mapped[int] = mapped_column(default=0, nullable=False)
 
     report: Mapped["Report"] = relationship(back_populates="caught_fish", uselist=False)
 
@@ -63,7 +63,7 @@ class Image(Base):
     __tablename__ = "images"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    path: Mapped[str] = mapped_column()
+    path: Mapped[str] = mapped_column(nullable=False)
     report_id: Mapped[int] = mapped_column(ForeignKey("reports.id", ondelete="CASCADE"))
 
     report: Mapped["Report"] = relationship(back_populates="images", uselist=False)
@@ -81,7 +81,7 @@ class Comment(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     text: Mapped[str] = mapped_column(nullable=False)
-    created_at: Mapped[datetime.datetime] = mapped_column(default=func.now())
+    created_at: Mapped[datetime.datetime] = mapped_column(default=func.now(), nullable=False)
     report_id: Mapped[int] = mapped_column(ForeignKey("reports.id", ondelete="CASCADE"))
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
 
@@ -120,10 +120,10 @@ class Report(Base):
     __tablename__ = "reports"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    title: Mapped[str] = mapped_column()
+    title: Mapped[str] = mapped_column(nullable=False)
     description: Mapped[str] = mapped_column(nullable=True)
-    tackle: Mapped[FishingTackle] = mapped_column()
-    created_at: Mapped[datetime.datetime] = mapped_column(default=func.now())
+    tackle: Mapped[FishingTackle] = mapped_column(nullable=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(default=func.now(), nullable=False)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
 
     caught_fish: Mapped[list["CaughtFish"]] = relationship(back_populates="report", uselist=True, lazy="selectin",
