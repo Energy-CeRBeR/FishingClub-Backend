@@ -1,6 +1,6 @@
 import datetime
 from enum import Enum
-from typing import Dict, Any
+from typing import Dict, List, Any
 
 from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -126,13 +126,13 @@ class Report(Base):
     created_at: Mapped[datetime.datetime] = mapped_column(default=func.now(), nullable=False)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
 
-    caught_fish: Mapped[list["CaughtFish"]] = relationship(back_populates="report", uselist=True, lazy="selectin",
+    caught_fish: Mapped[List["CaughtFish"]] = relationship(back_populates="report", uselist=True, lazy="selectin",
                                                            cascade="all, delete-orphan")
-    images: Mapped[list["Image"]] = relationship(back_populates="report", uselist=True, lazy="selectin",
+    images: Mapped[List["Image"]] = relationship(back_populates="report", uselist=True, lazy="selectin",
                                                  cascade="all, delete-orphan")
-    comments: Mapped[list["Comment"]] = relationship(back_populates="report", uselist=True, lazy="selectin",
+    comments: Mapped[List["Comment"]] = relationship(back_populates="report", uselist=True, lazy="selectin",
                                                      cascade="all, delete-orphan")
-    stars: Mapped[list["Star"]] = relationship(back_populates="report", uselist=True, lazy="selectin",
+    stars: Mapped[List["Star"]] = relationship(back_populates="report", uselist=True, lazy="selectin",
                                                cascade="all, delete-orphan")
     user: Mapped["User"] = relationship(back_populates="reports", uselist=False)
 
