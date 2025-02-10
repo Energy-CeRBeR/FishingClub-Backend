@@ -23,19 +23,10 @@ class UserRepository:
         async with async_session() as session:
             query = select(User).where(User.email == user.email)
             result = await session.execute(query)
-            potential_user_1 = result.mappings().all()
-        if potential_user_1:
+            potential_user = result.mappings().all()
+        if potential_user:
             raise HTTPException(
                 status_code=400, detail="User with this email already exists"
-            )
-
-        async with async_session() as session:
-            query = select(User).where(User.short_name == user.short_name)
-            result = await session.execute(query)
-            potential_user_2 = result.mappings().all()
-        if potential_user_2:
-            raise HTTPException(
-                status_code=400, detail="User with this shortname already exists"
             )
 
         password = user.password
@@ -73,13 +64,6 @@ class UserRepository:
     async def get_user_by_email(self, email: str) -> Optional[User]:
         async with async_session() as session:
             query = select(User).where(User.email == email)
-            result = await session.execute(query)
-            user = result.scalars().first()
-        return user
-
-    async def get_user_by_short_name(self, short_name: str) -> Optional[User]:
-        async with async_session() as session:
-            query = select(User).where(User.short_name == short_name)
             result = await session.execute(query)
             user = result.scalars().first()
         return user

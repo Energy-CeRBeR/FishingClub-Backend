@@ -43,8 +43,8 @@ class UserService:
 
     def create_access_token(self, user: User) -> str:
         jwt_payload = {
-            "sub": user.short_name,
-            "short_name": user.short_name,
+            "sub": user.email,
+            "user_id": user.id,
             "email": user.email,
         }
         return self.create_jwt(
@@ -55,7 +55,7 @@ class UserService:
 
     def create_refresh_token(self, user: User) -> str:
         jwt_payload = {
-            "sub": user.short_name
+            "sub": user.email
         }
         return self.create_jwt(
             token_type=REFRESH_TOKEN_TYPE,
@@ -97,16 +97,16 @@ class UserService:
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail=f"Invalid token type {token_type!r} expected {expected_token_type!r}"
                 )
-            short_name: str = payload.get("sub")
-            if short_name is None:
+            email: str = payload.get("sub")
+            if email is None:
                 raise credentials_exception
-            token_data = TokenData(short_name=short_name)
+            token_data = TokenData(email=email)
 
         except jwt.DecodeError:
             raise credentials_exception
         except jwt.ExpiredSignatureError:
             raise credentials_exception
-        user = await self.repository.get_user_by_short_name(token_data.short_name)
+        user = await self.repository.get_user_by_email(token_data.email)
         if user is None:
             raise credentials_exception
 
