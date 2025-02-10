@@ -4,7 +4,7 @@ from typing import List
 from pydantic import BaseModel
 
 from src.reports.schemas import ReportResponse
-from src.users.models import Gender, Roles
+from src.users.models import Gender
 
 
 class SuccessfulResponse(BaseModel):
@@ -44,7 +44,7 @@ class UserResponse(BaseModel):
     email: str
     is_verified: bool
     is_active: bool
-    role: Roles
+    role: bool
     gender: Gender
     created_at: datetime
     reports: List[ReportResponse]
