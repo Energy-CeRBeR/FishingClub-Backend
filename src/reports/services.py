@@ -1,8 +1,11 @@
 from typing import List
 
+from src.reports.exceptions import ReportNotFoundException, SelfReportStarException, CommentNotFoundException, \
+    FishAlreadyExistsException, FishNotFoundException
 from src.reports.models import Report, CaughtFish, Comment
 from src.reports.repositories import ReportRepository
-from src.reports.schemas import ReportCreate, FishCreate, FishEdit
+from src.reports.schemas import ReportCreate, FishCreate, FishEdit, ReportEdit
+
 from src.users.models import User
 
 
@@ -12,8 +15,12 @@ class ReportService:
     async def create_report(self, report: ReportCreate, user_id: int) -> Report:
         return await self.repository.create_report(report, user_id)
 
-    async def edit_report(self, report: Report, report_create: ReportCreate) -> Report:
-        return await self.repository.edit_report(report, report_create)
+    async def edit_report(self, report_id: int, edited_report: ReportEdit, user: User) -> Report:
+        report = await self.get_report_by_id(report_id)
+        if report.user_id != user.id:
+            raise ReportNotFoundException()
+
+        return await self.repository.edit_report(report, edited_report)
 
     async def get_all_reports(self) -> List[Report]:
         return await self.repository.get_all_reports()
@@ -22,34 +29,72 @@ class ReportService:
         return await self.repository.get_all_user_reports(user_id)
 
     async def get_report_by_id(self, report_id: int) -> Report:
-        return await self.repository.get_report_by_id(report_id)
+        report = await self.repository.get_report_by_id(report_id)
+        if report is None:
+            raise ReportNotFoundException()
+
+        return report
 
     async def get_comment_by_id(self, comment_id: int) -> Comment:
-        return await self.repository.get_comment_by_id(comment_id)
+        comment = await self.repository.get_comment_by_id(comment_id)
+        if comment is None:
+            raise CommentNotFoundException()
 
-    async def delete_report(self, report: Report) -> None:
+    async def delete_report(self, report_id: int, user: User) -> None:
+        report = await self.get_report_by_id(report_id)
+        if report.user_id != user.id:
+            raise ReportNotFoundException()
+
         return await self.repository.delete_report(report)
 
-    async def add_fish_to_report(self, report: Report, fish: FishCreate) -> Report:
-        return await self.repository.add_fish(fish, report)
+    async def add_fish_to_report(self, report_id: int, new_fish: FishCreate, user: User) -> Report:
+        report = await self.get_report_by_id(report_id)
+        if report.user_id != user.id:
+            raise ReportNotFoundException()
+        if any(fish.fish_type == new_fish.fish_type for fish in report.caught_fish):
+            raise FishAlreadyExistsException()
 
-    async def edit_fish_in_report(self, fish: CaughtFish, edit_fish: FishEdit, report: Report) -> Report:
+        return await self.repository.add_fish(new_fish, report)
+
+    async def edit_fish_in_report(self, fish_id: int, edit_fish: FishEdit, report_id: int, user: User) -> Report:
+        fish = await self.get_fish_by_id(fish_id)
+        report = await self.get_report_by_id(report_id)
+        if report.user_id != user.id or fish.report_id != report_id:
+            raise ReportNotFoundException()
+
         return await self.repository.edit_fish(fish, edit_fish, report)
 
-    async def delete_fish_from_report(self, fish: CaughtFish) -> None:
+    async def delete_fish_from_report(self, fish_id: int, report_id: int, user: User) -> None:
+        fish = await self.get_fish_by_id(fish_id)
+        report = await self.get_report_by_id(report_id)
+        if report.user_id != user.id or fish.report_id != report_id:
+            raise ReportNotFoundException()
+
         return await self.repository.delete_fish(fish)
 
     async def get_fish_by_id(self, fish_id: int) -> CaughtFish:
-        return await self.repository.get_fish_by_id(fish_id)
+        fish = await self.repository.get_fish_by_id(fish_id)
+        if fish is None:
+            raise FishNotFoundException()
 
-    async def stared_report(self, report: Report, user: User) -> Report:
+        return fish
+
+    async def stared_report(self, report_id: int, user: User) -> Report:
+        report = await self.get_report_by_id(report_id)
+        if report.user_id == user.id:
+            raise SelfReportStarException()
+
         flag = self.is_stared(report, user)
         return await self.repository.stared_report(report, user, flag)
 
-    async def comment_report(self, report: Report, user: User, text: str) -> Report:
+    async def comment_report(self, report_id: int, user: User, text: str) -> Report:
+        report = await self.get_report_by_id(report_id)
         return await self.repository.comment_report(report, user, text)
 
-    async def delete_comment(self, comment: Comment) -> None:
+    async def delete_comment(self, comment_id: int, user: User) -> None:
+        comment = await self.get_comment_by_id(comment_id)
+        if comment.user_id != user.id:
+            raise CommentNotFoundException()
         return await self.repository.delete_comment(comment)
 
     @staticmethod
@@ -58,18 +103,6 @@ class ReportService:
             if star.report_id == report.id:
                 return True
         return False
-
-    @staticmethod
-    def caught_fish_to_dict(caught_fish: list[CaughtFish]) -> list[dict]:
-        response = []
-        for fish in caught_fish:
-            response.append({
-                "fish_type": fish.fish_type.value,
-                "total_weight": fish.total_weight,
-                "total_count": fish.total_count
-            })
-
-        return response
 
     @staticmethod
     def reports_to_dict(reports: list[Report]) -> list[Report]:

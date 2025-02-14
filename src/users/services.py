@@ -7,6 +7,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from config_data.config import Config, load_config
+from src.users.exceptions import TokenTypeException, NotFoundException, EmailExistsException
 from src.users.models import User
 from src.users.repositories import UserRepository
 from src.users.schemas import UserCreate, TokenData, UserEdit
@@ -93,10 +94,8 @@ class UserService:
             payload = decode_jwt(token=token)
             token_type = payload.get(TOKEN_TYPE_FIELD)
             if token_type != expected_token_type:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail=f"Invalid token type {token_type!r} expected {expected_token_type!r}"
-                )
+                raise TokenTypeException()
+
             email: str = payload.get("sub")
             if email is None:
                 raise credentials_exception
@@ -106,6 +105,7 @@ class UserService:
             raise credentials_exception
         except jwt.ExpiredSignatureError:
             raise credentials_exception
+
         user = await self.repository.get_user_by_email(token_data.email)
         if user is None:
             raise credentials_exception
@@ -121,10 +121,12 @@ class UserService:
     async def get_user_by_id(self, user_id: int) -> User:
         user = await self.repository.get_user_by_id(user_id)
         if user is None:
-            raise HTTPException(status_code=404, detail="User not found")
+            raise NotFoundException()
         return user
 
     async def create_user(self, user: UserCreate) -> User:
+        if await self.repository.get_user_by_email(user.email) is not None:
+            raise EmailExistsException()
         return await self.repository.create_user(user)
 
     async def edit_user_info(self, user: User, user_edit: UserEdit) -> User:

@@ -5,7 +5,7 @@ from sqlalchemy import select, insert, delete, and_, update
 
 from src.database import async_session
 from src.reports.models import Report, CaughtFish, Star, Comment
-from src.reports.schemas import ReportCreate, FishCreate, FishEdit
+from src.reports.schemas import ReportCreate, FishCreate, FishEdit, ReportEdit
 from src.users.models import User
 
 
@@ -29,8 +29,8 @@ class ReportRepository:
             new_report: Report = await self.get_report_by_id(report_dc["id"])
             return new_report
 
-    async def edit_report(self, report: Report, report_create: ReportCreate) -> Report:
-        report_dc = report_create.dict()
+    async def edit_report(self, report: Report, edited_report: ReportEdit) -> Report:
+        report_dc = edited_report.dict()
         async with async_session() as session:
             stmt = update(Report).where(Report.id == report.id).values(**report_dc)
             await session.execute(stmt)

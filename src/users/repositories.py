@@ -1,15 +1,13 @@
 import random
-from typing import Optional
 
+from typing import Optional
 from sqlalchemy import insert, select, delete, update
 
-from src.utils import auth_settings
 from src.users.models import User
 from src.users.schemas import UserCreate, UserEdit
 
-from fastapi import HTTPException
-
 from src.database import async_session
+from src.utils import auth_settings
 
 
 class UserRepository:
@@ -20,15 +18,6 @@ class UserRepository:
         return new_id
 
     async def create_user(self, user: UserCreate) -> User:
-        async with async_session() as session:
-            query = select(User).where(User.email == user.email)
-            result = await session.execute(query)
-            potential_user = result.mappings().all()
-        if potential_user:
-            raise HTTPException(
-                status_code=400, detail="User with this email already exists"
-            )
-
         password = user.password
         user_dc = user.dict(exclude={"password"})
         user_dc["password_hash"] = auth_settings.hash_password(password)

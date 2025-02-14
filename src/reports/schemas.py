@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, List
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from src.reports.models import FishingTackle, RiverFish
 
@@ -11,6 +11,12 @@ class SuccessfulResponse(BaseModel):
 
 
 class ReportCreate(BaseModel):
+    title: str
+    description: str
+    tackle: FishingTackle
+
+
+class ReportEdit(BaseModel):
     title: str
     description: str
     tackle: FishingTackle
